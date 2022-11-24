@@ -1,0 +1,162 @@
+CREATE OR REPLACE PROCEDURE add_user (              
+p_user_id IN NUMBER,
+p_name IN VARCHAR2,
+p_last_name IN VARCHAR2,
+p_new_email IN VARCHAR2,
+p_language IN VARCHAR2,
+p_country IN VARCHAR2,
+p_city IN VARCHAR2,
+p_address IN VARCHAR2,
+p_postal_code IN VARCHAR2,
+p_plan_id IN NUMBER)
+IS
+BEGIN
+
+    INSERT INTO USERS (USER_ID,NAME,LAST_NAME,EMAIL,LANGUAGE,COUNTRY,CITY,ADDRESS,POSTAL_CODE,PLAN_ID)
+    VALUES (p_user_id,p_name,p_last_name,p_new_email,p_language,p_country,p_city,p_address,p_postal_code,p_plan_id);
+  
+  COMMIT;
+ 
+END;
+/
+
+drop procedure add_user;
+
+BEGIN 
+
+add_user(8,'alex','jacob','alex@','English','Czech','prague','parizska street', 'cz-1000',1);
+
+END;
+
+
+CREATE OR REPLACE FUNCTION CHECK_USER (p_user_id IN VARCHAR2)
+RETURN VARCHAR2
+IS 
+v_user_active VARCHAR2(1);
+BEGIN
+    SELECT ACTIVE INTO v_user_active FROM USERS 
+    WHERE ACTIVE = 'N';
+RETURN v_user_active;
+
+END;
+
+BEGIN 
+
+DBMS_OUTPUT.put_line(CHECK_USER(2));
+
+END;
+
+
+SELECT CHECK_USER(1) FROM USERS;
+
+DROP FUNCTION CHECK_USER;
+
+CREATE OR REPLACE VIEW USER_ACCOUNTS AS
+SELECT U.USER_ID AS USR  ,A.* FROM USERS U , ACCOUNTS A;
+
+SELECT * FROM USER_ACCOUNTS;
+
+
+CREATE OR REPLACE PROCEDURE UPDATE_STATUS 
+(p_user_id IN NUMBER,
+p_active IN VARCHAR2,
+p_error OUT VARCHAR2)
+
+IS
+BEGIN
+UPDATE USERS 
+        SET ACTIVE = p_active
+        where USER_ID = p_user_id;       
+    commit;
+EXCEPTION
+        WHEN OTHERS THEN
+            p_error := SQLERRM;         
+END;
+
+DECLARE 
+v_error VARCHAR2(100);
+BEGIN
+UPDATE_STATUS
+(
+p_user_id=> 8,
+p_active => 'Y',
+p_error =>  v_error
+);
+DBMS_OUTPUT.PUT_LINE(v_error);
+END;
+
+drop procedure UPDATE_STATUS;
+    
+
+CREATE OR REPLACE PROCEDURE ADD_CONTENTS(
+p_content_id IN NUMBER,
+p_content_type IN VARCHAR2,
+p_genre_id IN NUMBER,
+p_title IN VARCHAR2,
+p_release_date IN DATE,
+p_end_date IN DATE,
+p_runtime IN NUMBER,
+p_no_of_seasons IN NUMBER,
+p_country IN VARCHAR2,
+p_language IN VARCHAR2,
+p_parental_guide IN  VARCHAR2
+)
+IS
+BEGIN
+INSERT INTO CONTENT_GENERAL_INFO (
+CONTENT_ID,					
+CONTENT_TYPE,
+GENRE_ID,
+TITLE,					
+RELEASE_DATE,					
+END_DATE,					
+RUNTIME	,				
+NUMBER_SEASONS	,				
+RELEASE_COUNTRY	,				
+ORIGINAL_LANGUAGE	,				
+PARENTAL_GUIDE)
+VALUES
+(
+p_content_id,
+p_content_type,
+p_genre_id,
+p_title,
+p_release_date,
+p_end_date,
+p_runtime,
+p_no_of_seasons,
+p_country,
+p_language,
+p_parental_guide
+);
+COMMIT;
+END;
+
+
+BEGIN
+
+ADD_CONTENTS (7,'TV',4,'YOUNG SHELDON','25-SEP-17','10-NOV-22',436,6,'AMERICA','ENGLISH','PG');
+
+END;
+
+drop procedure add_contents;
+
+
+CREATE OR REPLACE FUNCTION CHECK_ACTIVE (p_user_id USERS.USER_ID%TYPE )
+RETURN VARCHAR2
+AS
+v_user_active VARCHAR2(1);
+BEGIN
+   SELECT ACTIVE INTO v_user_active FROM USERS WHERE USER_ID= p_user_id;
+        RETURN v_user_active;
+END;
+
+SET SERVEROUTPUT ON;
+BEGIN
+DBMS_OUTPUT.PUT_LINE(CHECK_ACTIVE(5));
+END;
+
+drop function check_active;
+
+
+
